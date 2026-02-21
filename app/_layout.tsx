@@ -8,7 +8,10 @@ function AuthGate() {
   const { user, loadingAuth } = useAuth();
   const pathname = usePathname();
 
-  const isPublic = pathname === "/"; // index.tsx
+  const isPublic =
+    pathname === "/" ||
+    pathname === "/register" ||
+    pathname === "/forgot-password";
 
   if (loadingAuth) {
     return (
@@ -29,6 +32,27 @@ function AuthGate() {
   return (
     <Stack>
       <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="register"
+        options={{
+          title: "",
+          headerStyle: {
+            backgroundColor: "#004D61",
+          },
+          headerTintColor: "#FFFFFF",
+        }}
+      />
+      <Stack.Screen
+        name="forgot-password"
+        options={{
+          title: "",
+          headerStyle: {
+            backgroundColor: "#004D61",
+          },
+          headerTintColor: "#FFFFFF",
+        }}
+      />
+
       <Stack.Screen
         name="dashboard"
         options={{ title: "Dashboard", headerShown: false }}

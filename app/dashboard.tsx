@@ -155,10 +155,21 @@ export default function DashboardScreen() {
           Você ainda não tem transações cadastradas.
         </Text>
 
-        <View style={{ marginTop: 18, width: "100%" }}>
+        <View style={{ marginTop: 18, width: "100%", gap: 18 }}>
           <Button
             title="Criar primeira transação"
             onPress={() => router.navigate("/transactions")}
+          />
+
+          <Button
+            title="Sair"
+            onPress={async () => {
+              try {
+                await logout();
+              } catch (e: any) {
+                Alert.alert("Erro", e?.message ?? "Falha ao sair");
+              }
+            }}
           />
         </View>
       </View>
@@ -240,7 +251,6 @@ export default function DashboardScreen() {
             onPress={async () => {
               try {
                 await logout();
-                // router.replace("/"); // ou "/login" se existir
               } catch (e: any) {
                 Alert.alert("Erro", e?.message ?? "Falha ao sair");
               }
