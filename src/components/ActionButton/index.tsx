@@ -1,3 +1,4 @@
+import React from "react";
 import { Pressable, StyleSheet, Text } from "react-native";
 
 interface ActionButtonProps {
@@ -13,10 +14,14 @@ const ActionButton: React.FC<ActionButtonProps> = ({
 }) => {
   return (
     <Pressable
-      style={[styles.contextButtonActive, { backgroundColor }]}
       onPress={onPress}
+      style={({ pressed }) => [
+        styles.button,
+        { backgroundColor },
+        pressed && styles.pressed,
+      ]}
     >
-      <Text style={styles.contextButtonText}>{display}</Text>
+      <Text style={styles.text}>{display}</Text>
     </Pressable>
   );
 };
@@ -24,13 +29,19 @@ const ActionButton: React.FC<ActionButtonProps> = ({
 export default ActionButton;
 
 const styles = StyleSheet.create({
-  contextButtonActive: {
+  button: {
+    height: 48,
     borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  contextButtonText: {
-    fontSize: 16,
+  text: {
+    fontSize: 15,
     color: "#FFFFFF",
-    padding: 12,
-    textAlign: "center",
+    fontWeight: "700",
+  },
+  pressed: {
+    opacity: 0.85,
+    transform: [{ scale: 0.98 }],
   },
 });

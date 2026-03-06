@@ -1,5 +1,9 @@
 import React, { useMemo } from "react";
-import { Text, View, useWindowDimensions } from "react-native";
+import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
+
+/* ----------------------------------------------------------------------------
+ * Utils (mantidos aqui, mas você pode mover para utils/ depois)
+ * -------------------------------------------------------------------------- */
 
 function toJSDate(raw: any): Date {
   if (!raw) return new Date(NaN);
@@ -73,6 +77,10 @@ function formatCompactBRL(v: number) {
   return String(Math.round(v));
 }
 
+/* ----------------------------------------------------------------------------
+ * Component
+ * -------------------------------------------------------------------------- */
+
 export function ColumnChart({
   items,
   height = 180,
@@ -124,8 +132,12 @@ export function ColumnChart({
     return series.some((m) => m.income > 0 || m.expense > 0);
   }, [series]);
 
+  /* ----------------------------------------------------------------------------
+   * Layout / sizing (mesma lógica)
+   * -------------------------------------------------------------------------- */
+
   const chartWidth = width; // 100%
-  const leftGutter = 44;
+  const leftGutter = 46;
   const rightGutter = 10;
 
   const plotWidth = Math.max(0, chartWidth - leftGutter - rightGutter);
@@ -168,70 +180,60 @@ export function ColumnChart({
     return value;
   });
 
+  /* ----------------------------------------------------------------------------
+   * Empty state
+   * -------------------------------------------------------------------------- */
+
   if (!hasAnyValue) {
     return (
-      <View>
-        <Text style={{ fontSize: 16, fontWeight: "800", marginBottom: 10 }}>
-          Receita x Despesa (últimos 3 meses)
-        </Text>
-        <Text style={{ opacity: 0.7 }}>Sem dados nos últimos 3 meses.</Text>
+      <View style={styles.container}>
+        <Text style={styles.title}>Receita x Despesa</Text>
+        <Text style={styles.subtitle}>Últimos 3 meses</Text>
+
+        <View style={styles.emptyBox}>
+          <Text style={styles.emptyText}>Sem dados nos últimos 3 meses.</Text>
+        </View>
       </View>
     );
   }
 
-  return (
-    <View style={{ width: "100%" }}>
-      <Text style={{ fontSize: 16, fontWeight: "800", marginBottom: 10 }}>
-        Receita x Despesa (últimos 3 meses)
-      </Text>
+  /* ----------------------------------------------------------------------------
+   * Render
+   * -------------------------------------------------------------------------- */
 
-      <View style={{ width: "100%" }}>
-        <View style={{ flexDirection: "row" }}>
-          <View
-            style={{
-              width: leftGutter,
-              height,
-              justifyContent: "space-between",
-              paddingRight: 8,
-            }}
-          >
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Receita x Despesa</Text>
+      <Text style={styles.subtitle}>Últimos 3 meses</Text>
+
+      <View>
+        <View style={styles.row}>
+          {/* Y axis labels */}
+          <View style={[styles.yAxis, { width: leftGutter, height }]}>
             {yLabels.map((v, idx) => (
-              <Text
-                key={idx}
-                style={{ fontSize: 11, opacity: 0.65, textAlign: "right" }}
-              >
+              <Text key={idx} style={styles.yAxisText}>
                 {formatCompactBRL(v)}
               </Text>
             ))}
           </View>
 
-          <View style={{ flex: 1, paddingRight: rightGutter }}>
-            <View style={{ height, position: "relative" }}>
-              {/* Grid */}
+          {/* Plot */}
+          <View style={[styles.plotWrap, { paddingRight: rightGutter }]}>
+            <View style={[styles.plotArea, { height }]}>
+              {/* Grid lines */}
               {Array.from({ length: sections + 1 }, (_, i) => (
                 <View
                   key={i}
-                  style={{
-                    position: "absolute",
-                    left: 0,
-                    right: 0,
-                    top: Math.round((height * i) / sections),
-                    height: 1,
-                    backgroundColor: "#E5E7EB",
-                    opacity: i === sections ? 1 : 0.8,
-                  }}
+                  style={[
+                    styles.gridLine,
+                    { top: Math.round((height * i) / sections) },
+                    i === sections && styles.gridLineBottom,
+                  ]}
                 />
               ))}
 
-              <View
-                style={{
-                  position: "absolute",
-                  left: startX,
-                  bottom: 0,
-                  flexDirection: "row",
-                  alignItems: "flex-end",
-                }}
-              >
+              {/* Bars */}
+              <View style={[styles.barsRow, { left: startX }]}>
                 {series.map((m, idx) => {
                   const incomeH = barH(m.income);
                   const expenseH = barH(m.expense);
@@ -239,32 +241,35 @@ export function ColumnChart({
                   return (
                     <View
                       key={m.key}
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "flex-end",
-                        marginRight: idx === series.length - 1 ? 0 : groupGap,
-                      }}
+                      style={[
+                        styles.group,
+                        {
+                          marginRight: idx === series.length - 1 ? 0 : groupGap,
+                        },
+                      ]}
                     >
                       <View
-                        style={{
-                          width: barWidth,
-                          height: incomeH,
-                          backgroundColor: "#16A34A",
-                          borderTopLeftRadius: 6,
-                          borderTopRightRadius: 6,
-                        }}
+                        style={[
+                          styles.bar,
+                          styles.incomeBar,
+                          {
+                            width: barWidth,
+                            height: incomeH,
+                          },
+                        ]}
                       />
 
                       <View style={{ width: innerGap }} />
 
                       <View
-                        style={{
-                          width: barWidth,
-                          height: expenseH,
-                          backgroundColor: "#DC2626",
-                          borderTopLeftRadius: 6,
-                          borderTopRightRadius: 6,
-                        }}
+                        style={[
+                          styles.bar,
+                          styles.expenseBar,
+                          {
+                            width: barWidth,
+                            height: expenseH,
+                          },
+                        ]}
                       />
                     </View>
                   );
@@ -272,57 +277,171 @@ export function ColumnChart({
               </View>
             </View>
 
-            <View
-              style={{
-                marginTop: 8,
-                flexDirection: "row",
-                paddingLeft: startX,
-              }}
-            >
+            {/* X labels */}
+            <View style={[styles.xLabelsRow, { paddingLeft: startX }]}>
               {series.map((m, idx) => (
                 <View
                   key={m.key}
-                  style={{
-                    width: groupWidth,
-                    marginRight: idx === series.length - 1 ? 0 : groupGap,
-                    alignItems: "center",
-                  }}
+                  style={[
+                    styles.xLabelBox,
+                    {
+                      width: groupWidth,
+                      marginRight: idx === series.length - 1 ? 0 : groupGap,
+                    },
+                  ]}
                 >
-                  <Text style={{ fontSize: 10, fontWeight: "600" }}>
-                    {m.label}
-                  </Text>
+                  <Text style={styles.xLabelText}>{m.label}</Text>
                 </View>
               ))}
             </View>
           </View>
         </View>
 
-        <View style={{ marginTop: 12, flexDirection: "row", gap: 14 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            <View
-              style={{
-                width: 10,
-                height: 10,
-                backgroundColor: "#16A34A",
-                borderRadius: 2,
-              }}
-            />
-            <Text>Receita</Text>
-          </View>
-
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            <View
-              style={{
-                width: 10,
-                height: 10,
-                backgroundColor: "#DC2626",
-                borderRadius: 2,
-              }}
-            />
-            <Text>Despesa</Text>
-          </View>
+        {/* Legend */}
+        <View style={styles.legendRow}>
+          <LegendItem label="Receita" color="#004D61" />
+          <LegendItem label="Despesa" color="#FF5031" />
         </View>
       </View>
     </View>
   );
 }
+
+/* ----------------------------------------------------------------------------
+ * Legend
+ * -------------------------------------------------------------------------- */
+
+function LegendItem({ label, color }: { label: string; color: string }) {
+  return (
+    <View style={styles.legendItem}>
+      <View style={[styles.legendDot, { backgroundColor: color }]} />
+      <Text style={styles.legendText}>{label}</Text>
+    </View>
+  );
+}
+
+/* ----------------------------------------------------------------------------
+ * Styles
+ * -------------------------------------------------------------------------- */
+
+const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+  },
+  title: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#101828",
+    letterSpacing: 0.2,
+    textTransform: "uppercase",
+  },
+  subtitle: {
+    marginTop: 2,
+    fontSize: 12,
+    color: "#667085",
+    textTransform: "uppercase",
+    letterSpacing: 0.2,
+    marginBottom: 12,
+  },
+  row: {
+    flexDirection: "row",
+  },
+  yAxis: {
+    justifyContent: "space-between",
+    paddingRight: 8,
+  },
+  yAxisText: {
+    fontSize: 11,
+    color: "#667085",
+    textAlign: "right",
+    fontWeight: "600",
+  },
+  plotWrap: {
+    flex: 1,
+  },
+  plotArea: {
+    position: "relative",
+  },
+  gridLine: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: "#DEE9EA",
+    opacity: 0.85,
+  },
+  gridLineBottom: {
+    opacity: 1,
+  },
+  barsRow: {
+    position: "absolute",
+    bottom: 0,
+    flexDirection: "row",
+    alignItems: "flex-end",
+  },
+  group: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+  },
+  bar: {
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+  },
+  incomeBar: {
+    backgroundColor: "#004D61",
+  },
+  expenseBar: {
+    backgroundColor: "#FF5031",
+  },
+  xLabelsRow: {
+    marginTop: 10,
+    flexDirection: "row",
+  },
+  xLabelBox: {
+    alignItems: "center",
+  },
+  xLabelText: {
+    fontSize: 11,
+    fontWeight: "800",
+    color: "#344054",
+  },
+  legendRow: {
+    marginTop: 12,
+    flexDirection: "row",
+    gap: 14,
+    justifyContent: "flex-start",
+  },
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 999,
+    backgroundColor: "#F8F8F8",
+    borderWidth: 1,
+    borderColor: "#DEE9EA",
+    gap: 8,
+  },
+  legendDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 3,
+  },
+  legendText: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: "#344054",
+  },
+  emptyBox: {
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: "#DEE9EA",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 14,
+  },
+  emptyText: {
+    color: "#667085",
+    fontWeight: "600",
+  },
+});

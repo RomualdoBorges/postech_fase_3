@@ -1,5 +1,6 @@
+import { formatBRL } from "@/src/utils";
 import React from "react";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 export type TopExpenseItem = {
   id: string;
@@ -9,59 +10,101 @@ export type TopExpenseItem = {
   date: Date;
 };
 
-function formatBRL(v: number) {
-  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
-
 type Props = {
   top5: TopExpenseItem[];
 };
 
 export function Top5ExpensesCard({ top5 }: Props) {
   return (
-    <View style={{ padding: 12, borderWidth: 1, borderRadius: 10 }}>
-      <Text style={{ fontSize: 16, fontWeight: "800", marginBottom: 10 }}>
-        Top 5 gastos do mês
-      </Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Top 5 despesas do mês</Text>
 
       {top5.length === 0 ? (
-        <Text>Nenhuma despesa neste mês.</Text>
+        <Text style={styles.empty}>Nenhuma despesa neste mês.</Text>
       ) : (
-        <View style={{ gap: 10 }}>
-          {top5.map((x, idx) => (
-            <View
-              key={x.id}
-              style={{
-                paddingVertical: 10,
-                borderTopWidth: idx === 0 ? 0 : 1,
-                borderTopColor: "#E5E7EB",
-                gap: 4,
-              }}
-            >
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  gap: 10,
-                }}
-              >
-                <Text style={{ fontWeight: "800", flex: 1 }} numberOfLines={1}>
-                  {idx + 1}. {x.title}
-                </Text>
-                <Text style={{ fontWeight: "900" }}>{formatBRL(x.value)}</Text>
-              </View>
+        <View style={styles.list}>
+          {top5.map((x, idx) => {
+            const isFirst = idx === 0;
 
-              <Text style={{ opacity: 0.7 }}>
-                {x.category} •{" "}
-                {x.date.toLocaleDateString("pt-BR", {
-                  day: "2-digit",
-                  month: "2-digit",
-                })}
-              </Text>
-            </View>
-          ))}
+            return (
+              <View
+                key={x.id}
+                style={[styles.item, !isFirst && styles.itemBorder]}
+              >
+                <View style={styles.row}>
+                  <Text style={styles.itemTitle} numberOfLines={1}>
+                    {idx + 1}. {x.title}
+                  </Text>
+
+                  <Text style={styles.value}>{formatBRL(x.value)}</Text>
+                </View>
+
+                <Text style={styles.meta}>
+                  {x.category} •{" "}
+                  {x.date.toLocaleDateString("pt-BR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                  })}
+                </Text>
+              </View>
+            );
+          })}
         </View>
       )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#101828",
+    letterSpacing: 0.2,
+    textTransform: "uppercase",
+    marginBottom: 10,
+  },
+  empty: {
+    fontSize: 13,
+    color: "#667085",
+  },
+  list: {
+    gap: 10,
+    width: "100%",
+  },
+  item: {
+    paddingVertical: 10,
+    gap: 6,
+  },
+  itemBorder: {
+    borderTopWidth: 1,
+    borderTopColor: "#E6EEF0",
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 10,
+  },
+  itemTitle: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    color: "#101828",
+  },
+  value: {
+    fontSize: 14,
+    fontWeight: "900",
+    color: "#FF5031",
+  },
+  meta: {
+    fontSize: 12,
+    color: "#667085",
+    letterSpacing: 0.2,
+    textTransform: "uppercase",
+  },
+});
