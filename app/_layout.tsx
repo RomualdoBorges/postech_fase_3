@@ -1,24 +1,84 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { AuthProvider, useAuth } from "@/src/context/AuthContext";
+import { TransactionsProvider } from "@/src/context/TransactionsContext";
+import { Redirect, Stack, usePathname } from "expo-router";
+import React from "react";
+import { ActivityIndicator, View } from "react-native";
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+function AuthGate() {
+  const { user, loadingAuth } = useAuth();
+  const pathname = usePathname();
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+  const isPublic =
+    pathname === "/" ||
+    pathname === "/register" ||
+    pathname === "/forgot-password";
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  if (loadingAuth) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
+  if (!user && !isPublic) {
+    return <Redirect href="/" />;
+  }
+
+  if (user && isPublic) {
+    return <Redirect href="/dashboard" />;
+  }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <Stack>
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="register"
+        options={{
+          title: "",
+          headerStyle: {
+            backgroundColor: "#004D61",
+          },
+          headerTintColor: "#FFFFFF",
+        }}
+      />
+      <Stack.Screen
+        name="forgot-password"
+        options={{
+          title: "",
+          headerStyle: {
+            backgroundColor: "#004D61",
+          },
+          headerTintColor: "#FFFFFF",
+        }}
+      />
+
+      <Stack.Screen
+        name="dashboard"
+        options={{ title: "Dashboard", headerShown: false }}
+      />
+      <Stack.Screen
+        name="transactions/index"
+        options={{ title: "Transações" }}
+      />
+      <Stack.Screen
+        name="transactions/add"
+        options={{ title: "Nova Transação" }}
+      />
+      <Stack.Screen
+        name="transactions/[id]"
+        options={{ title: "Editar Transação" }}
+      />
+    </Stack>
+  );
+}
+
+export default function Layout() {
+  return (
+    <AuthProvider>
+      <TransactionsProvider>
+        <AuthGate />
+      </TransactionsProvider>
+    </AuthProvider>
   );
 }
