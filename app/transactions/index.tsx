@@ -1,4 +1,6 @@
 import { useTransactions } from "@/src/context/TransactionsContext";
+import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from "@/src/constants/categories";
+import ActionButton from "@/src/components/ActionButton";
 import { Picker } from "@react-native-picker/picker";
 import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";
@@ -12,7 +14,6 @@ import React, {
 import {
   ActivityIndicator,
   Animated,
-  Button,
   FlatList,
   Pressable,
   Text,
@@ -106,21 +107,25 @@ export default function TransactionsListScreen() {
     loadFirstPage();
   }, [loadFirstPage]);
 
-  const categories = useMemo(() => {
-    const set = new Set<string>();
-    for (const t of items) {
-      if (t.category) set.add(t.category);
-    }
-    return ["(Todas)", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
-  }, [items]);
-
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [draftType, setDraftType] = useState<TypeFilterOption>("(Todos)");
   const [draftCategory, setDraftCategory] = useState<string>("(Todas)");
   const [draftDatePreset, setDraftDatePreset] =
     useState<DatePreset>("(Qualquer data)");
-
+    
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    const categories = draftType === "income" ?
+      INCOME_CATEGORIES : draftType === "expense" ? 
+        EXPENSE_CATEGORIES : [];
+    
+    for (const t of categories) {
+      set.add(t);
+    }
+    return ["(Todas)", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
+    
+  }, [draftType]);
   useEffect(() => {
     if (!filtersOpen) return;
 
@@ -209,17 +214,17 @@ export default function TransactionsListScreen() {
 
   return (
     <View style={{ flex: 1, padding: 16, gap: 12 }}>
-      <Button
-        title="Nova transação"
+      <ActionButton
+        display="Nova transação"
         onPress={() => router.push("/transactions/add")}
       />
 
       <View style={{ flexDirection: "row", gap: 10 }}>
-        <Button
-          title={hasActiveFilters ? "Filtros (ativos)" : "Filtros"}
+        <ActionButton
+          display={hasActiveFilters ? "Filtros (ativos)" : "Filtros"}
           onPress={openFilters}
         />
-        <Button title="Recarregar" onPress={loadFirstPage} />
+        <ActionButton display="Recarregar" onPress={loadFirstPage} />
       </View>
 
       <FlatList
@@ -269,8 +274,8 @@ export default function TransactionsListScreen() {
               <Text>{valueText}</Text>
 
               <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
-                <Button
-                  title="Editar"
+                <ActionButton
+                  display="Editar"
                   onPress={() =>
                     router.push({
                       pathname: "/transactions/[id]",
@@ -278,9 +283,9 @@ export default function TransactionsListScreen() {
                     })
                   }
                 />
-                <Button
-                  title="Excluir"
-                  color="red"
+                <ActionButton
+                  display="Excluir"
+                  backgroundColor="red"
                   onPress={() => remove(item.id)}
                 />
               </View>
@@ -384,11 +389,11 @@ export default function TransactionsListScreen() {
             </View>
 
             <View style={{ flexDirection: "row", gap: 10 }}>
-              <Button title="Aplicar" onPress={applyDraftFilters} />
-              <Button title="Limpar" onPress={clearDraftAndFilters} />
+              <ActionButton display="Aplicar" onPress={applyDraftFilters} />
+              <ActionButton display="Limpar" onPress={clearDraftAndFilters} />
             </View>
 
-            <Button title="Fechar" onPress={() => closeFilters()} />
+            <ActionButton display="Fechar" onPress={() => closeFilters()} />
           </Animated.View>
         </View>
       ) : null}

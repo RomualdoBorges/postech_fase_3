@@ -1,3 +1,4 @@
+import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "@/src/constants/categories";
 import { useAuth } from "@/src/context/AuthContext";
 import { useTransactions } from "@/src/context/TransactionsContext";
 import { pickReceiptFile, uploadReceipt } from "@/src/services/receipts";
@@ -5,26 +6,6 @@ import { Picker } from "@react-native-picker/picker";
 import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
 import { Alert, Button, Text, TextInput, View } from "react-native";
-
-const EXPENSE_CATEGORIES = [
-  "Alimentação",
-  "Transporte",
-  "Moradia",
-  "Saúde",
-  "Lazer",
-  "Educação",
-  "Assinaturas",
-  "Impostos",
-  "Outros",
-];
-
-const INCOME_CATEGORIES = [
-  "Salário",
-  "Freelance",
-  "Investimentos",
-  "Venda",
-  "Outros",
-];
 
 export default function AddTransactionScreen() {
   const { user } = useAuth();
