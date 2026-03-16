@@ -1,6 +1,7 @@
-import { useTransactions } from "@/src/context/TransactionsContext";
-import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from "@/src/constants/categories";
 import ActionButton from "@/src/components/ActionButton";
+import { SummaryCard } from "@/src/components/SummaryCard";
+import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "@/src/constants/categories";
+import { useTransactions } from "@/src/context/TransactionsContext";
 import { Picker } from "@react-native-picker/picker";
 import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";
@@ -16,6 +17,7 @@ import {
   Animated,
   FlatList,
   Pressable,
+  StyleSheet,
   Text,
   TouchableWithoutFeedback,
   View,
@@ -214,85 +216,92 @@ export default function TransactionsListScreen() {
 
   return (
     <View style={{ flex: 1, padding: 16, gap: 12 }}>
-      <ActionButton
-        display="Nova transação"
-        onPress={() => router.push("/transactions/add")}
-      />
+      <Animated.View style={[styles.card]}>
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <ActionButton
+            display={hasActiveFilters ? "Filtros (ativos)" : "Filtros"}
+            buttonType="small"
+            onPress={openFilters}
+          />
+          <ActionButton display="Recarregar" buttonType="small" onPress={loadFirstPage} />
+        </View>
 
-      <View style={{ flexDirection: "row", gap: 10 }}>
-        <ActionButton
-          display={hasActiveFilters ? "Filtros (ativos)" : "Filtros"}
-          onPress={openFilters}
-        />
-        <ActionButton display="Recarregar" onPress={loadFirstPage} />
-      </View>
-
-      <FlatList
-        data={items}
-        keyExtractor={(item) => item.id}
-        onRefresh={refresh}
-        refreshing={loading}
-        onEndReached={() => {
-          if (hasMore && !loadingMore) loadNextPage();
-        }}
-        onEndReachedThreshold={0.4}
-        ListEmptyComponent={
-          <Text style={{ marginTop: 16 }}>Nenhuma transação encontrada.</Text>
-        }
-        ListFooterComponent={
-          loadingMore ? (
-            <View style={{ paddingVertical: 12 }}>
-              <ActivityIndicator />
-            </View>
-          ) : null
-        }
-        renderItem={({ item }) => {
-          const valueText =
-            item.type === "expense"
-              ? `- ${formatBRL(item.value)}`
-              : `+ ${formatBRL(item.value)}`;
-
-          return (
-            <Pressable
-              onPress={() =>
-                router.push({
-                  pathname: "/transactions/[id]",
-                  params: { id: item.id },
-                })
-              }
-              style={{
-                borderWidth: 1,
-                borderRadius: 8,
-                padding: 12,
-                marginBottom: 10,
-              }}
-            >
-              <Text style={{ fontSize: 16, fontWeight: "600" }}>
-                {item.title}
-              </Text>
-              <Text>{item.category}</Text>
-              <Text>{valueText}</Text>
-
-              <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
-                <ActionButton
-                  display="Editar"
-                  onPress={() =>
-                    router.push({
-                      pathname: "/transactions/[id]",
-                      params: { id: item.id },
-                    })
-                  }
-                />
-                <ActionButton
-                  display="Excluir"
-                  backgroundColor="red"
-                  onPress={() => remove(item.id)}
-                />
+        <FlatList
+          data={items}
+          keyExtractor={(item) => item.id}
+          onRefresh={refresh}
+          refreshing={loading}
+          onEndReached={() => {
+            if (hasMore && !loadingMore) loadNextPage();
+          }}
+          onEndReachedThreshold={0.4}
+          ListEmptyComponent={
+            <Text style={{ marginTop: 16 }}>Nenhuma transação encontrada.</Text>
+          }
+          ListFooterComponent={
+            loadingMore ? (
+              <View style={{ paddingVertical: 12 }}>
+                <ActivityIndicator />
               </View>
-            </Pressable>
-          );
-        }}
-      />
+            ) : null
+          }
+          renderItem={({ item }) => {
+            const valueText =
+              item.type === "expense"
+                ? `- ${formatBRL(item.value)}`
+                : `+ ${formatBRL(item.value)}`;
+
+            return (
+              <Pressable
+                onPress={() =>
+                  router.push({
+                    pathname: "/transactions/[id]",
+                    params: { id: item.id },
+                  })
+                }
+                style={{
+                  marginBottom: 10,
+                }}
+              >
+                
+                <SummaryCard
+                  title={item.title}
+                  value={valueText}
+                  badgeColor={valueText.startsWith("+") ? "#004D61" : "#FF5031"}
+                  subtitle={item.category}
+                >
+                  <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
+                    <ActionButton
+                      display="Editar"
+                      buttonType="small"
+                      onPress={() =>
+                        router.push({
+                          pathname: "/transactions/[id]",
+                          params: { id: item.id },
+                        })
+                      }
+                    />
+                    <ActionButton
+                      display="Excluir"
+                      buttonType="small"
+                      backgroundColor="red"
+                      onPress={() => remove(item.id)}
+                    />
+                  </View>
+                </SummaryCard>
+
+              </Pressable>
+            );
+          }}
+        />
+      </Animated.View>
+
+      <View style={{ height: "10%" }} >
+        <ActionButton
+          display="Nova transação"
+          onPress={() => router.push("/transactions/add")}
+        />
+      </View>
 
       {filtersOpen ? (
         <View
@@ -389,8 +398,8 @@ export default function TransactionsListScreen() {
             </View>
 
             <View style={{ flexDirection: "row", gap: 10 }}>
-              <ActionButton display="Aplicar" onPress={applyDraftFilters} />
-              <ActionButton display="Limpar" onPress={clearDraftAndFilters} />
+              <ActionButton display="Aplicar" buttonType="small" onPress={applyDraftFilters} />
+              <ActionButton display="Limpar" buttonType="small" onPress={clearDraftAndFilters} />
             </View>
 
             <ActionButton display="Fechar" onPress={() => closeFilters()} />
@@ -400,3 +409,21 @@ export default function TransactionsListScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    borderWidth: 1,
+    borderColor: "#DEE9EA",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 14,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 2,
+    flexDirection: "column",
+    gap: 10,
+    height: "90%"
+  },
+});

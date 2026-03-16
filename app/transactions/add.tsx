@@ -1,3 +1,4 @@
+import ActionButton from "@/src/components/ActionButton";
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "@/src/constants/categories";
 import { useAuth } from "@/src/context/AuthContext";
 import { useTransactions } from "@/src/context/TransactionsContext";
@@ -5,7 +6,7 @@ import { pickReceiptFile, uploadReceipt } from "@/src/services/receipts";
 import { Picker } from "@react-native-picker/picker";
 import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
-import { Alert, Button, Text, TextInput, View } from "react-native";
+import { Alert, Text, TextInput, View } from "react-native";
 
 export default function AddTransactionScreen() {
   const { user } = useAuth();
@@ -99,15 +100,17 @@ export default function AddTransactionScreen() {
       <Text style={{ fontSize: 18, fontWeight: "700" }}>Nova Transação</Text>
 
       <View style={{ flexDirection: "row", gap: 10 }}>
-        <Button
-          title={type === "expense" ? "✅ Despesa" : "Despesa"}
+        <ActionButton
+          display={type === "expense" ? "✅ Despesa" : "Despesa"}
+          buttonType="small"
           onPress={() => {
             setType("expense");
             setCategory(EXPENSE_CATEGORIES[0]);
           }}
         />
-        <Button
-          title={type === "income" ? "✅ Receita" : "Receita"}
+        <ActionButton
+          display={type === "income" ? "✅ Receita" : "Receita"}
+          buttonType="small"
           onPress={() => {
             setType("income");
             setCategory(INCOME_CATEGORIES[0]);
@@ -141,8 +144,8 @@ export default function AddTransactionScreen() {
         </Picker>
       </View>
 
-      <Button
-        title="Selecionar recibo (imagem/PDF)"
+      <ActionButton
+        display="Selecionar recibo (imagem/PDF)"
         onPress={handlePickReceipt}
       />
       {receiptFile ? (
@@ -151,7 +154,7 @@ export default function AddTransactionScreen() {
         <Text>Nenhum recibo selecionado.</Text>
       )}
 
-      <Button title="Salvar" onPress={handleSubmit} />
+      <ActionButton display="Salvar" onPress={handleSubmit} />
     </View>
   );
 }

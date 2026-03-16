@@ -5,18 +5,23 @@ interface ActionButtonProps {
   onPress: () => void;
   display: string;
   backgroundColor?: string;
+  buttonType?: "small" | "medium";
 }
 
 const ActionButton: React.FC<ActionButtonProps> = ({
   onPress,
   display,
   backgroundColor = "#024D60",
+  buttonType = "medium",
 }) => {
+
+  const stylesButton = buttonType === "medium" ? styles.buttonMedium : styles.buttonSmall;
+
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [
-        styles.button,
+        stylesButton,
         { backgroundColor },
         pressed && styles.pressed,
       ]}
@@ -29,9 +34,15 @@ const ActionButton: React.FC<ActionButtonProps> = ({
 export default ActionButton;
 
 const styles = StyleSheet.create({
-  button: {
+  buttonMedium: {
     height: 48,
     borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  buttonSmall: {
+    height: 32,
+    borderRadius: 6,
     justifyContent: "center",
     alignItems: "center",
   },
