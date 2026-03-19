@@ -199,6 +199,11 @@ export default function TransactionsListScreen() {
     closeFilters();
   }
 
+  function reloadList() {
+    clearDraftAndFilters();
+    loadFirstPage();
+  }
+
   const hasActiveFilters =
     !!filters.type ||
     !!filters.category ||
@@ -216,15 +221,15 @@ export default function TransactionsListScreen() {
 
   return (
     <View style={{ flex: 1, padding: 16, gap: 12 }}>
-      <Animated.View style={[styles.card]}>
+      <View style={[styles.card]}>
         <View style={{ flexDirection: "row", gap: 10 }}>
           <ActionButton
             display={hasActiveFilters ? "Filtros (ativos)" : "Filtros"}
             buttonType="small"
             onPress={openFilters}
-            disabled={items.length === 0}
+            disabled={items.length === 0 && !hasActiveFilters}
           />
-          <ActionButton display="Recarregar" buttonType="small" onPress={loadFirstPage} />
+          <ActionButton display="Recarregar" buttonType="small" onPress={reloadList} />
         </View>
 
         <FlatList
@@ -295,9 +300,9 @@ export default function TransactionsListScreen() {
             );
           }}
         />
-      </Animated.View>
+      </View>
 
-      <View style={{ height: "10%" }} >
+      <View style={{ marginTop: "auto" }} >
         <ActionButton
           display="Nova transação"
           onPress={() => router.push("/transactions/add")}
@@ -313,6 +318,8 @@ export default function TransactionsListScreen() {
             top: 0,
             bottom: 0,
             justifyContent: "flex-end",
+            zIndex: 50,
+            elevation: 50,
           }}
         >
           <TouchableWithoutFeedback onPress={() => closeFilters()}>
@@ -425,6 +432,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     flexDirection: "column",
     gap: 10,
-    height: "90%"
+    flex: 1,
+    overflow: "visible",
   },
 });
