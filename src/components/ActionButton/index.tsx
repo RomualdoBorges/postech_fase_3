@@ -6,6 +6,7 @@ interface ActionButtonProps {
   display: string;
   backgroundColor?: string;
   buttonType?: "small" | "medium";
+  disabled?: boolean;
 }
 
 const ActionButton: React.FC<ActionButtonProps> = ({
@@ -13,6 +14,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   display,
   backgroundColor = "#024D60",
   buttonType = "medium",
+  disabled = false,
 }) => {
 
   const stylesButton = buttonType === "medium" ? styles.buttonMedium : styles.buttonSmall;
@@ -22,9 +24,10 @@ const ActionButton: React.FC<ActionButtonProps> = ({
       onPress={onPress}
       style={({ pressed }) => [
         stylesButton,
-        { backgroundColor },
+        disabled ? {backgroundColor: "#024d607a"} : {backgroundColor},
         pressed && styles.pressed,
       ]}
+      disabled={disabled}
     >
       <Text style={styles.text}>{display}</Text>
     </Pressable>

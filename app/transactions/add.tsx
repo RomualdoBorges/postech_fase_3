@@ -145,7 +145,7 @@ export default function AddTransactionScreen() {
       </View>
 
       <ActionButton
-        display="Selecionar recibo (imagem/PDF)"
+        display="Anexar recibo (imagem/PDF)"
         onPress={handlePickReceipt}
       />
       {receiptFile ? (

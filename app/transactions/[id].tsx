@@ -184,15 +184,13 @@ export default function EditTransactionScreen() {
         </Picker>
       </View>
 
-      <ActionButton display="Salvar alterações" onPress={handleSave} />
-
       <ActionButton
         display="Anexar recibo (imagem/PDF)"
         onPress={handleAttachReceipt}
       />
 
       {current.receiptUrl ? (
-        <View style={{ gap: 8 }}>
+        <View style={{ gap: 24 }}>
           <Text>Recibo: {current.receiptName ?? "anexado"}</Text>
           <ActionButton
             display="Ver recibo"
@@ -203,7 +201,11 @@ export default function EditTransactionScreen() {
         <Text>Nenhum recibo anexado.</Text>
       )}
 
-      <ActionButton display="Excluir" backgroundColor="red" onPress={handleDelete} />
+      <ActionButton display="Salvar alterações" onPress={handleSave} />
+
+      <View style={{ marginTop: 'auto' }} >
+        <ActionButton display="Excluir" backgroundColor="red" onPress={handleDelete} />
+      </View>
     </View>
   );
 }

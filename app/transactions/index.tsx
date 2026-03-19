@@ -222,6 +222,7 @@ export default function TransactionsListScreen() {
             display={hasActiveFilters ? "Filtros (ativos)" : "Filtros"}
             buttonType="small"
             onPress={openFilters}
+            disabled={items.length === 0}
           />
           <ActionButton display="Recarregar" buttonType="small" onPress={loadFirstPage} />
         </View>
