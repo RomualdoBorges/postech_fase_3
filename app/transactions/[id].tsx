@@ -35,7 +35,7 @@ export default function EditTransactionScreen() {
       initialType === "expense" ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
 
     setTitle(current.title);
-    setValue(String(current.value));
+    setValue(String(current.value).replace(".", ","));
     setType(initialType);
 
     if (current.category && initialCats.includes(current.category)) {

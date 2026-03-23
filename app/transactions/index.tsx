@@ -120,7 +120,7 @@ export default function TransactionsListScreen() {
     const set = new Set<string>();
     const categories = draftType === "income" ?
       INCOME_CATEGORIES : draftType === "expense" ? 
-        EXPENSE_CATEGORIES : [];
+        EXPENSE_CATEGORIES : [...INCOME_CATEGORIES, ...EXPENSE_CATEGORIES];
     
     for (const t of categories) {
       set.add(t);
