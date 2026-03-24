@@ -1,3 +1,5 @@
+import ActionButton from "@/src/components/ActionButton";
+import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "@/src/constants/categories";
 import { useAuth } from "@/src/context/AuthContext";
 import { useTransactions } from "@/src/context/TransactionsContext";
 import { pickReceiptFile, uploadReceipt } from "@/src/services/receipts";
@@ -5,27 +7,7 @@ import { Picker } from "@react-native-picker/picker";
 import * as Linking from "expo-linking";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
-import { Alert, Button, Text, TextInput, View } from "react-native";
-
-const EXPENSE_CATEGORIES = [
-  "Alimentação",
-  "Transporte",
-  "Moradia",
-  "Saúde",
-  "Lazer",
-  "Educação",
-  "Assinaturas",
-  "Impostos",
-  "Outros",
-];
-
-const INCOME_CATEGORIES = [
-  "Salário",
-  "Freelance",
-  "Investimentos",
-  "Venda",
-  "Outros",
-];
+import { Alert, Text, TextInput, View } from "react-native";
 
 export default function EditTransactionScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -53,7 +35,7 @@ export default function EditTransactionScreen() {
       initialType === "expense" ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
 
     setTitle(current.title);
-    setValue(String(current.value));
+    setValue(String(current.value).replace(".", ","));
     setType(initialType);
 
     if (current.category && initialCats.includes(current.category)) {
@@ -75,7 +57,7 @@ export default function EditTransactionScreen() {
     return (
       <View style={{ flex: 1, padding: 16, justifyContent: "center" }}>
         <Text>ID inválido.</Text>
-        <Button title="Voltar" onPress={() => router.back()} />
+        <ActionButton display="Voltar" onPress={() => router.back()} />
       </View>
     );
   }
@@ -84,7 +66,7 @@ export default function EditTransactionScreen() {
     return (
       <View style={{ flex: 1, padding: 16, justifyContent: "center" }}>
         <Text>Transação não encontrada (talvez não carregou ainda).</Text>
-        <Button title="Voltar" onPress={() => router.back()} />
+        <ActionButton display="Voltar" onPress={() => router.back()} />
       </View>
     );
   }
@@ -164,12 +146,14 @@ export default function EditTransactionScreen() {
       <Text style={{ fontSize: 18, fontWeight: "700" }}>Editar Transação</Text>
 
       <View style={{ flexDirection: "row", gap: 10 }}>
-        <Button
-          title={type === "expense" ? "✅ Despesa" : "Despesa"}
+        <ActionButton
+          display={type === "expense" ? "✅ Despesa" : "Despesa"}
+          buttonType="small"
           onPress={() => setType("expense")}
         />
-        <Button
-          title={type === "income" ? "✅ Receita" : "Receita"}
+        <ActionButton
+          display={type === "income" ? "✅ Receita" : "Receita"}
+          buttonType="small"
           onPress={() => setType("income")}
         />
       </View>
@@ -200,18 +184,16 @@ export default function EditTransactionScreen() {
         </Picker>
       </View>
 
-      <Button title="Salvar alterações" onPress={handleSave} />
-
-      <Button
-        title="Anexar recibo (imagem/PDF)"
+      <ActionButton
+        display="Anexar recibo (imagem/PDF)"
         onPress={handleAttachReceipt}
       />
 
       {current.receiptUrl ? (
-        <View style={{ gap: 8 }}>
+        <View style={{ gap: 24 }}>
           <Text>Recibo: {current.receiptName ?? "anexado"}</Text>
-          <Button
-            title="Ver recibo"
+          <ActionButton
+            display="Ver recibo"
             onPress={() => Linking.openURL(current.receiptUrl!)}
           />
         </View>
@@ -219,7 +201,11 @@ export default function EditTransactionScreen() {
         <Text>Nenhum recibo anexado.</Text>
       )}
 
-      <Button title="Excluir" color="red" onPress={handleDelete} />
+      <ActionButton display="Salvar alterações" onPress={handleSave} />
+
+      <View style={{ marginTop: 'auto' }} >
+        <ActionButton display="Excluir" backgroundColor="red" onPress={handleDelete} />
+      </View>
     </View>
   );
 }

@@ -7,6 +7,7 @@ type Props = {
   badgeColor: string;
   valueColor?: string;
   subtitle?: string;
+  children?: React.ReactNode;
 };
 
 export function SummaryCard({
@@ -15,6 +16,7 @@ export function SummaryCard({
   badgeColor,
   valueColor = "#0F172A",
   subtitle,
+  children,
 }: Props) {
   return (
     <View style={styles.card}>
@@ -25,6 +27,8 @@ export function SummaryCard({
         {subtitle ? <Text style={styles.cardSubtitle}>{subtitle}</Text> : null}
 
         <Text style={[styles.cardValue, { color: valueColor }]}>{value}</Text>
+
+        {children}
       </View>
     </View>
   );
