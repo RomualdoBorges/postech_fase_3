@@ -1,3 +1,6 @@
+import ActionButton from "@/src/components/ActionButton";
+import { SummaryCard } from "@/src/components/SummaryCard";
+import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "@/src/constants/categories";
 import { useTransactions } from "@/src/context/TransactionsContext";
 import { Picker } from "@react-native-picker/picker";
 import { useFocusEffect } from "@react-navigation/native";
@@ -12,9 +15,9 @@ import React, {
 import {
   ActivityIndicator,
   Animated,
-  Button,
   FlatList,
   Pressable,
+  StyleSheet,
   Text,
   TouchableWithoutFeedback,
   View,
@@ -106,21 +109,25 @@ export default function TransactionsListScreen() {
     loadFirstPage();
   }, [loadFirstPage]);
 
-  const categories = useMemo(() => {
-    const set = new Set<string>();
-    for (const t of items) {
-      if (t.category) set.add(t.category);
-    }
-    return ["(Todas)", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
-  }, [items]);
-
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [draftType, setDraftType] = useState<TypeFilterOption>("(Todos)");
   const [draftCategory, setDraftCategory] = useState<string>("(Todas)");
   const [draftDatePreset, setDraftDatePreset] =
     useState<DatePreset>("(Qualquer data)");
-
+    
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    const categories = draftType === "income" ?
+      INCOME_CATEGORIES : draftType === "expense" ? 
+        EXPENSE_CATEGORIES : [...INCOME_CATEGORIES, ...EXPENSE_CATEGORIES];
+    
+    for (const t of categories) {
+      set.add(t);
+    }
+    return ["(Todas)", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
+    
+  }, [draftType]);
   useEffect(() => {
     if (!filtersOpen) return;
 
@@ -192,6 +199,11 @@ export default function TransactionsListScreen() {
     closeFilters();
   }
 
+  function reloadList() {
+    clearDraftAndFilters();
+    loadFirstPage();
+  }
+
   const hasActiveFilters =
     !!filters.type ||
     !!filters.category ||
@@ -209,85 +221,93 @@ export default function TransactionsListScreen() {
 
   return (
     <View style={{ flex: 1, padding: 16, gap: 12 }}>
-      <Button
-        title="Nova transação"
-        onPress={() => router.push("/transactions/add")}
-      />
+      <View style={[styles.card]}>
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <ActionButton
+            display={hasActiveFilters ? "Filtros (ativos)" : "Filtros"}
+            buttonType="small"
+            onPress={openFilters}
+            disabled={items.length === 0 && !hasActiveFilters}
+          />
+          <ActionButton display="Recarregar" buttonType="small" onPress={reloadList} />
+        </View>
 
-      <View style={{ flexDirection: "row", gap: 10 }}>
-        <Button
-          title={hasActiveFilters ? "Filtros (ativos)" : "Filtros"}
-          onPress={openFilters}
+        <FlatList
+          data={items}
+          keyExtractor={(item) => item.id}
+          onRefresh={refresh}
+          refreshing={loading}
+          onEndReached={() => {
+            if (hasMore && !loadingMore) loadNextPage();
+          }}
+          onEndReachedThreshold={0.4}
+          ListEmptyComponent={
+            <Text style={{ marginTop: 16 }}>Nenhuma transação encontrada.</Text>
+          }
+          ListFooterComponent={
+            loadingMore ? (
+              <View style={{ paddingVertical: 12 }}>
+                <ActivityIndicator />
+              </View>
+            ) : null
+          }
+          renderItem={({ item }) => {
+            const valueText =
+              item.type === "expense"
+                ? `- ${formatBRL(item.value)}`
+                : `+ ${formatBRL(item.value)}`;
+
+            return (
+              <Pressable
+                onPress={() =>
+                  router.push({
+                    pathname: "/transactions/[id]",
+                    params: { id: item.id },
+                  })
+                }
+                style={{
+                  marginBottom: 10,
+                }}
+              >
+                
+                <SummaryCard
+                  title={item.title}
+                  value={valueText}
+                  badgeColor={valueText.startsWith("+") ? "#004D61" : "#FF5031"}
+                  subtitle={item.category}
+                >
+                  <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
+                    <ActionButton
+                      display="Editar"
+                      buttonType="small"
+                      onPress={() =>
+                        router.push({
+                          pathname: "/transactions/[id]",
+                          params: { id: item.id },
+                        })
+                      }
+                    />
+                    <ActionButton
+                      display="Excluir"
+                      buttonType="small"
+                      backgroundColor="red"
+                      onPress={() => remove(item.id)}
+                    />
+                  </View>
+                </SummaryCard>
+
+              </Pressable>
+            );
+          }}
         />
-        <Button title="Recarregar" onPress={loadFirstPage} />
       </View>
 
-      <FlatList
-        data={items}
-        keyExtractor={(item) => item.id}
-        onRefresh={refresh}
-        refreshing={loading}
-        onEndReached={() => {
-          if (hasMore && !loadingMore) loadNextPage();
-        }}
-        onEndReachedThreshold={0.4}
-        ListEmptyComponent={
-          <Text style={{ marginTop: 16 }}>Nenhuma transação encontrada.</Text>
-        }
-        ListFooterComponent={
-          loadingMore ? (
-            <View style={{ paddingVertical: 12 }}>
-              <ActivityIndicator />
-            </View>
-          ) : null
-        }
-        renderItem={({ item }) => {
-          const valueText =
-            item.type === "expense"
-              ? `- ${formatBRL(item.value)}`
-              : `+ ${formatBRL(item.value)}`;
-
-          return (
-            <Pressable
-              onPress={() =>
-                router.push({
-                  pathname: "/transactions/[id]",
-                  params: { id: item.id },
-                })
-              }
-              style={{
-                borderWidth: 1,
-                borderRadius: 8,
-                padding: 12,
-                marginBottom: 10,
-              }}
-            >
-              <Text style={{ fontSize: 16, fontWeight: "600" }}>
-                {item.title}
-              </Text>
-              <Text>{item.category}</Text>
-              <Text>{valueText}</Text>
-
-              <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
-                <Button
-                  title="Editar"
-                  onPress={() =>
-                    router.push({
-                      pathname: "/transactions/[id]",
-                      params: { id: item.id },
-                    })
-                  }
-                />
-                <Button
-                  title="Excluir"
-                  color="red"
-                  onPress={() => remove(item.id)}
-                />
-              </View>
-            </Pressable>
-          );
-        }}
-      />
+      <View style={{ marginTop: "auto" }} >
+        <ActionButton
+          display="Nova transação"
+          onPress={() => router.push("/transactions/add")}
+        />
+      </View>
 
       {filtersOpen ? (
         <View
@@ -298,6 +318,8 @@ export default function TransactionsListScreen() {
             top: 0,
             bottom: 0,
             justifyContent: "flex-end",
+            zIndex: 50,
+            elevation: 50,
           }}
         >
           <TouchableWithoutFeedback onPress={() => closeFilters()}>
@@ -384,14 +406,33 @@ export default function TransactionsListScreen() {
             </View>
 
             <View style={{ flexDirection: "row", gap: 10 }}>
-              <Button title="Aplicar" onPress={applyDraftFilters} />
-              <Button title="Limpar" onPress={clearDraftAndFilters} />
+              <ActionButton display="Aplicar" buttonType="small" onPress={applyDraftFilters} />
+              <ActionButton display="Limpar" buttonType="small" onPress={clearDraftAndFilters} />
             </View>
 
-            <Button title="Fechar" onPress={() => closeFilters()} />
+            <ActionButton display="Fechar" onPress={() => closeFilters()} />
           </Animated.View>
         </View>
       ) : null}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    borderWidth: 1,
+    borderColor: "#DEE9EA",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 14,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 2,
+    flexDirection: "column",
+    gap: 10,
+    flex: 1,
+    overflow: "visible",
+  },
+});
