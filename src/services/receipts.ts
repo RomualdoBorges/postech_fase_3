@@ -2,14 +2,14 @@ import * as DocumentPicker from "expo-document-picker";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { storage } from "./firebase";
 
-export type PickedFile = {
+type PickedFile = {
   uri: string;
   name: string;
   mimeType?: string;
   size?: number;
 };
 
-export type UploadReceiptResult = {
+type UploadReceiptResult = {
   receiptUrl: string;
   receiptPath: string;
   receiptName: string;

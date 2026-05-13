@@ -1,8 +1,7 @@
 import ActionButton from "@/src/components/ActionButton";
 import CustomTextInput from "@/src/components/CustomTextInput";
-import { auth } from "@/src/services/firebase";
+import { resetPassword } from "@/src/services/auth";
 import { router } from "expo-router";
-import { sendPasswordResetEmail } from "firebase/auth";
 import React, { useState } from "react";
 import { Alert, Image, StyleSheet, Text, View } from "react-native";
 
@@ -19,7 +18,7 @@ export default function ForgotPasswordScreen() {
     try {
       setLoading(true);
 
-      await sendPasswordResetEmail(auth, email);
+      await resetPassword(email);
 
       Alert.alert(
         "Email enviado",

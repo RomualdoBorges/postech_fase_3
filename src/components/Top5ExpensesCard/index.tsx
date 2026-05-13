@@ -2,7 +2,7 @@ import { formatBRL } from "@/src/utils";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-export type TopExpenseItem = {
+type TopExpenseItem = {
   id: string;
   title: string;
   category: string;

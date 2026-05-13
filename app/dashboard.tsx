@@ -1,3 +1,4 @@
+import { getMonthSummary } from "@/src/business/buildMonthSummary";
 import ActionButton from "@/src/components/ActionButton";
 import { ColumnChart } from "@/src/components/ColumnChart";
 import { DashboardHeader } from "@/src/components/DashboardHeader";
@@ -6,7 +7,7 @@ import { SummaryCards } from "@/src/components/SummaryCards";
 import { Top5ExpensesCard } from "@/src/components/Top5ExpensesCard";
 import { useAuth } from "@/src/context/AuthContext";
 import { useTransactions } from "@/src/context/TransactionsContext";
-import { formatBRL, getMonthSummary, monthKey, monthLabel } from "@/src/utils";
+import { formatBRL, monthKey, monthLabel } from "@/src/utils";
 import { router, useFocusEffect } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
@@ -80,7 +81,7 @@ export default function DashboardScreen() {
 
   const currentMonth = useMemo(() => monthKey(new Date()), []);
   const monthData = useMemo(() => {
-    return getMonthSummary(items as any[], currentMonth);
+    return getMonthSummary(items, currentMonth);
   }, [items, currentMonth]);
 
   if (loading && items.length === 0) {
@@ -150,7 +151,7 @@ export default function DashboardScreen() {
         </Animated.View>
 
         <Animated.View style={[styles.card, chartsAnimatedStyle]}>
-          <ColumnChart items={items as any} />
+          <ColumnChart items={items} />
         </Animated.View>
 
         <Animated.View style={[styles.card, chartsAnimatedStyle]}>

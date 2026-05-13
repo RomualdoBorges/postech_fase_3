@@ -10,22 +10,14 @@ import React, {
 import { Alert } from "react-native";
 import { useAuth } from "./AuthContext";
 
+import { getTransactionsSummary } from "../business/buildTransactionsSummary";
 import {
   addTransaction,
   deleteTransaction,
   listTransactionsPage,
   updateTransaction,
-  type Transaction,
-  type TransactionFilters,
-  type TransactionInput,
 } from "../services/transactions";
-
-type TransactionsSummary = {
-  income: number;
-  expense: number;
-  balance: number;
-  byCategory: { category: string; total: number }[];
-};
+import { Transaction, TransactionFilters, TransactionInput, TransactionsSummary } from "../types/transactions";
 
 type TransactionsContextType = {
   items: Transaction[];
@@ -70,28 +62,7 @@ export function TransactionsProvider({
   const pageSize = 10;
 
   const summary = useMemo<TransactionsSummary>(() => {
-    const income = items
-      .filter((t) => t.type === "income")
-      .reduce((acc, t) => acc + (t.value ?? 0), 0);
-
-    const expense = items
-      .filter((t) => t.type === "expense")
-      .reduce((acc, t) => acc + (t.value ?? 0), 0);
-
-    const balance = income - expense;
-
-    const byCategoryMap = new Map<string, number>();
-    for (const t of items) {
-      const key = t.category ?? "Sem categoria";
-      byCategoryMap.set(key, (byCategoryMap.get(key) ?? 0) + (t.value ?? 0));
-    }
-
-    const byCategory = Array.from(byCategoryMap.entries())
-      .map(([category, total]) => ({ category, total }))
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 6);
-
-    return { income, expense, balance, byCategory };
+    return getTransactionsSummary(items);
   }, [items]);
 
   const loadFirstPage = useCallback(async () => {

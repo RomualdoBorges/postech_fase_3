@@ -1,3 +1,4 @@
+import { Transaction } from "@/src/types/transactions";
 import React, { useMemo } from "react";
 import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
 
@@ -58,12 +59,6 @@ function lastNMonthKeys(n: number) {
   return out;
 }
 
-type Tx = {
-  type: "income" | "expense";
-  value: number;
-  date: any;
-};
-
 type MonthPoint = {
   key: string;
   label: string;
@@ -85,7 +80,7 @@ export function ColumnChart({
   items,
   height = 180,
 }: {
-  items: Tx[];
+  items: Transaction[];
   height?: number;
 }) {
   const { width } = useWindowDimensions();
@@ -97,17 +92,17 @@ export function ColumnChart({
     months.forEach((m) => byMonth.set(m, { income: 0, expense: 0 }));
 
     for (const t of items) {
-      const d = toJSDate((t as any).date);
+      const d = toJSDate(t.date);
       if (Number.isNaN(d.getTime())) continue;
 
       const key = monthKey(d);
       if (!byMonth.has(key)) continue;
 
-      const v = Number((t as any).value ?? 0);
+      const v = Number(t.value ?? 0);
       const slot = byMonth.get(key)!;
 
-      if ((t as any).type === "income") slot.income += v;
-      if ((t as any).type === "expense") slot.expense += v;
+      if (t.type === "income") slot.income += v;
+      if (t.type === "expense") slot.expense += v;
     }
 
     return months.map((m) => ({

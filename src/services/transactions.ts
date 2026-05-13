@@ -13,51 +13,13 @@ import {
   updateDoc,
   where,
   type DocumentData,
-  type QueryDocumentSnapshot,
-  type Timestamp,
+  type QueryDocumentSnapshot
 } from "firebase/firestore";
 
+import { Transaction, TransactionFilters, TransactionInput } from "../types/transactions";
 import { db } from "./firebase";
 
-export type TransactionType = "income" | "expense";
-
-export type ReceiptMeta = {
-  receiptUrl?: string;
-  receiptPath?: string;
-  receiptName?: string;
-  receiptType?: string; // mimeType
-};
-
-export type TransactionInput = {
-  title: string;
-  value: number;
-  type: TransactionType;
-  category: string;
-  date: Date;
-} & ReceiptMeta;
-
-export type Transaction = {
-  id: string;
-  title: string;
-  value: number;
-  type: TransactionType;
-  category: string;
-  date: Timestamp;
-  createdAt?: Timestamp;
-  updatedAt?: Timestamp;
-} & ReceiptMeta;
-
-export type TransactionFilters = {
-  type?: TransactionType;
-  category?: string;
-  dateFrom?: Date;
-  dateTo?: Date;
-  minValue?: number;
-  maxValue?: number;
-  order?: "asc" | "desc";
-};
-
-export type PaginatedResult<T> = {
+type PaginatedResult<T> = {
   items: T[];
   lastDoc: QueryDocumentSnapshot<DocumentData> | null;
   hasMore: boolean;
