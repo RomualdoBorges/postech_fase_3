@@ -1,14 +1,15 @@
+import { getMonthSummary } from "@/src/business/buildMonthSummary";
 import ActionButton from "@/src/components/ActionButton";
-import { ColumnChart } from "@/src/components/ColumnChart";
+// import { ColumnChart } from "@/src/components/ColumnChart";
 import { DashboardHeader } from "@/src/components/DashboardHeader";
 import { EmptyTransactionsState } from "@/src/components/EmptyTransactionsState";
 import { SummaryCards } from "@/src/components/SummaryCards";
-import { Top5ExpensesCard } from "@/src/components/Top5ExpensesCard";
+// import { Top5ExpensesCard } from "@/src/components/Top5ExpensesCard";
 import { useAuth } from "@/src/context/AuthContext";
 import { useTransactions } from "@/src/context/TransactionsContext";
-import { formatBRL, getMonthSummary, monthKey, monthLabel } from "@/src/utils";
+import { formatBRL, monthKey, monthLabel } from "@/src/utils";
 import { router, useFocusEffect } from "expo-router";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, { Suspense, useCallback, useEffect, useMemo, useRef } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -20,6 +21,12 @@ import {
 } from "react-native";
 
 export default function DashboardScreen() {
+  const ColumnChart = React.lazy(
+    () => import("@/src/components/ColumnChart")
+  );
+  const Top5ExpensesCard = React.lazy(
+    () => import("@/src/components/Top5ExpensesCard")
+  );
   const { items, loading, loadFirstPage } = useTransactions();
   const { logout } = useAuth();
 
@@ -80,7 +87,7 @@ export default function DashboardScreen() {
 
   const currentMonth = useMemo(() => monthKey(new Date()), []);
   const monthData = useMemo(() => {
-    return getMonthSummary(items as any[], currentMonth);
+    return getMonthSummary(items, currentMonth);
   }, [items, currentMonth]);
 
   if (loading && items.length === 0) {
@@ -150,11 +157,15 @@ export default function DashboardScreen() {
         </Animated.View>
 
         <Animated.View style={[styles.card, chartsAnimatedStyle]}>
-          <ColumnChart items={items as any} />
+          <Suspense fallback={<ActivityIndicator />}>
+            <ColumnChart items={items} />
+          </Suspense>
         </Animated.View>
 
         <Animated.View style={[styles.card, chartsAnimatedStyle]}>
-          <Top5ExpensesCard top5={monthData.top5} />
+          <Suspense fallback={<ActivityIndicator />}>
+            <Top5ExpensesCard top5={monthData.top5} />
+          </Suspense>
         </Animated.View>
 
         <View style={{ height: 18 }} />

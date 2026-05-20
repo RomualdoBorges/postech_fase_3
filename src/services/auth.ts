@@ -9,6 +9,7 @@
 
 import {
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   type UserCredential,
 } from "firebase/auth";
@@ -67,4 +68,13 @@ export async function register(
   await ensureUserDoc();
 
   return credential;
+}
+
+/* ----------------------------------------------------------------------------
+ * Reset de senha
+ * -------------------------------------------------------------------------- */
+export async function resetPassword(
+  email: string
+): Promise<void> {
+  return sendPasswordResetEmail(auth, email);
 }

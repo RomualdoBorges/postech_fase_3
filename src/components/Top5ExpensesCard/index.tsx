@@ -2,7 +2,7 @@ import { formatBRL } from "@/src/utils";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-export type TopExpenseItem = {
+type TopExpenseItem = {
   id: string;
   title: string;
   category: string;
@@ -14,7 +14,7 @@ type Props = {
   top5: TopExpenseItem[];
 };
 
-export function Top5ExpensesCard({ top5 }: Props) {
+export default function Top5ExpensesCard({ top5 }: Props) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Top 5 despesas do mês</Text>

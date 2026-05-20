@@ -1,8 +1,7 @@
-import { monthKey, toJSDate } from "./date";
+import { Transaction } from "../types/transactions";
+import { monthKey, toJSDate } from "../utils/date";
 
-type AnyTx = any;
-
-export function getMonthSummary(items: AnyTx[], currentMonth: string) {
+export function getMonthSummary(items: Transaction[], currentMonth: string) {
   const monthItems = items.filter((t) => {
     const d = toJSDate(t?.date);
     if (Number.isNaN(d.getTime())) return false;
