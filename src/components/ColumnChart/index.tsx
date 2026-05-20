@@ -76,7 +76,7 @@ function formatCompactBRL(v: number) {
  * Component
  * -------------------------------------------------------------------------- */
 
-export function ColumnChart({
+export default function ColumnChart({
   items,
   height = 180,
 }: {
